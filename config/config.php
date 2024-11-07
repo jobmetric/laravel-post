@@ -17,4 +17,16 @@ return [
 
     "cache_time" => env("POST_CACHE_TIME", 0),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Table Name
+    |--------------------------------------------------------------------------
+    |
+    | Table name in database
+    */
+
+    "tables" => [
+        'post' => 'posts',
+        'post_relation' => 'post_relations'
+    ],
 ];
