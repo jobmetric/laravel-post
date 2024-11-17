@@ -5,13 +5,13 @@ namespace JobMetric\Post\Enums;
 use JobMetric\PackageCore\Enums\EnumToArray;
 
 /**
- * @method static PUBLISH()
- * @method static FUTURE()
- * @method static DRAFT()
- * @method static PENDING()
- * @method static PRIVATE()
- * @method static ARCHIVE()
- * @method static DISABLED()
+ * @method static string PUBLISH()
+ * @method static string FUTURE()
+ * @method static string DRAFT()
+ * @method static string PENDING()
+ * @method static string PRIVATE()
+ * @method static string ARCHIVE()
+ * @method static string DISABLED()
  */
 enum PostStatusEnum: string
 {
