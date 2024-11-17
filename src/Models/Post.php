@@ -2,9 +2,17 @@
 
 namespace JobMetric\Post\Models;
 
+use DateTime;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use JobMetric\Media\Contracts\MediaContract;
+use JobMetric\Media\MediaableWithType;
+use JobMetric\Metadata\Contracts\MetaContract;
+use JobMetric\Metadata\HasMeta;
+use JobMetric\Metadata\MetaableWithType;
 use JobMetric\Post\Enums\PostStatusEnum;
+use JobMetric\Taxonomy\Contracts\TaxonomyContract;
+use JobMetric\Taxonomy\HasTaxonomy;
 use JobMetric\Translation\Contracts\TranslationContract;
 use JobMetric\Translation\HasTranslation;
 use JobMetric\Translation\TranslatableWithType;
@@ -13,18 +21,23 @@ use JobMetric\Translation\TranslatableWithType;
  * JobMetric\Category\Models\Post
  *
  * @property int $id
- * @property int $type
- * @property int $parent_id
- * @property int $ordering
- * @property int $status
+ * @property string $type
+ * @property bool $comment_status
+ * @property string $password
+ * @property PostStatusEnum $status
+ * @property DateTime $published_at
  *
  * @method static find(int $id)
  */
-class Post extends Model implements TranslationContract
+class Post extends Model implements TranslationContract, MetaContract, MediaContract, TaxonomyContract
 {
     use HasFactory,
         HasTranslation,
-        TranslatableWithType;
+        TranslatableWithType,
+        HasMeta,
+        MetaableWithType,
+        MediaableWithType,
+        HasTaxonomy;
 
     protected $fillable = [
         'type',
@@ -42,7 +55,9 @@ class Post extends Model implements TranslationContract
     protected $casts = [
         'type' => 'string',
         'comment_status' => 'boolean',
+        'password' => 'string',
         'status' => PostStatusEnum::class,
+        'published_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime'
@@ -88,4 +103,20 @@ class Post extends Model implements TranslationContract
             $this->setMediaCollection($type, $postType['media']);
         }
     }
+
+    /**
+     * taxonomy allows the type.
+     *
+     * @return array
+     */
+    public function taxonomyAllowTypes(): array
+    {
+        return [
+            'page' => [
+                'type' => 'page_taxonomy',
+                'multiple' => true
+            ]
+        ];
+    }
+
 }
