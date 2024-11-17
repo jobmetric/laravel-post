@@ -22,7 +22,8 @@ class PostTypeEvent
     {
         $type = $params['type'];
         $label = $params['args']['label'] ?? null;
-        $excerpt = $params['args']['excerpt'] ?? null;
+        $excerpt = $params['args']['translation']['excerpt'] ?? null;
+        $excerpt = $params['args']['translation']['content'] ?? null;
         $translation = $params['args']['translation'] ?? [];
         $metadata = $params['args']['metadata'] ?? [];
         $has_url = $params['args']['has_url'] ?? false;
@@ -33,7 +34,6 @@ class PostTypeEvent
             $this->postType = array_merge($this->postType, [
                 $type => [
                     'label' => $label,
-                    'excerpt' => $excerpt,
                     'translation' => $translation,
                     'metadata' => $metadata,
                     'has_url' => $has_url,
