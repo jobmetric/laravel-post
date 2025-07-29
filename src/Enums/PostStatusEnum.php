@@ -2,7 +2,7 @@
 
 namespace JobMetric\Post\Enums;
 
-use JobMetric\PackageCore\Enums\EnumToArray;
+use JobMetric\PackageCore\Enums\EnumMacros;
 
 /**
  * @method static PUBLISH()
@@ -15,7 +15,7 @@ use JobMetric\PackageCore\Enums\EnumToArray;
  */
 enum PostStatusEnum: string
 {
-    use EnumToArray;
+    use EnumMacros;
 
     case PUBLISH = "publish";
     case FUTURE = "future";
