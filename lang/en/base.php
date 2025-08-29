@@ -1,0 +1,95 @@
+<?php
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Base Taxonomy Language Lines
+    |--------------------------------------------------------------------------
+    |
+    | The following language lines are used during Taxonomy for
+    | various messages that we need to display to the user.
+    |
+    */
+    //TODO these error must be completed after writing panel
+
+    "validation" => [
+        "errors" => "Validation errors occurred.",
+        "type_required" => "The type field is required.",
+        "slug_in_type" => "The slug already exists in type (:type).",
+        "post_type_exist" => "The taxonomy does not exist in type (:type).",
+        "taxonomy_not_found" => "The taxonomy not found.",
+    ],
+
+    "messages" => [
+        "created" => "The post was created successfully.",
+        "updated" => "The post was updated successfully.",
+        "deleted" => "The post was deleted successfully.",
+        "attached" => "The post was attached successfully.",
+        "multi_attached" => "The taxonomies were attached successfully.",
+        "used_in" => "The post used in ':count' places.",
+        "deleted_items" => "{1} One item :post was deleted successfully.|[2,*] The :count items :post were deleted successfully.",
+        "status" => [
+            "enable" => "{1} One item :post was enabled successfully.|[2,*] The :count items :post were enabled successfully.",
+            "disable" => "{1} One item :post was disabled successfully.|[2,*] The :count items :post were disabled successfully.",
+        ],
+    ],
+
+    "exceptions" => [
+        "taxonomy_not_found" => "The taxonomy with number :number was not found.",
+        "taxonomy_is_disable" => "The taxonomy with number :number is disabled.",
+        "taxonomy_used" => "The taxonomy ':name' is used in other places.",
+        "cannot_make_parent_subset_own_child" => "Cannot make parent subset own child.",
+        "model_taxonomy_contract_not_found" => "Model ':model' not implements 'JobMetric\Taxonomy\Contracts\TaxonomyContract' interface!",
+        "taxonomy_collection_not_in_taxonomy_allow_types" => "The taxonomy collection :collection not in taxonomy allow types.",
+        "invalid_taxonomy_type_in_collection" => "The type of collection entered is ':collection', and the ':collection' also accepts ':collectionType' taxonomy type, but the taxonomy type you have given is ':baseType' and it is not acceptable.",
+        "post_type_not_match" => "The post type ':type' does not match any post types registered in your application via listeners.",
+    ],
+
+    "list" => [
+        "filters" => [
+            "name" => [
+                "title" => "Name",
+                "placeholder" => "Enter name.",
+            ],
+            "status" => [
+                "title" => "Status",
+            ],
+        ],
+        "columns" => [
+            "name" => "Name",
+            "status" => "Status",
+            "ordering" => "Ordering",
+            "action" => "Action",
+            "created_at" => "Created At",
+            "updated_at" => "Updated At",
+        ],
+    ],
+
+    "form" => [
+        "create" => [
+            "title" => "Create :type",
+        ],
+        "edit" => [
+            "title" => "Edit :type with ID :number",
+        ],
+        "media" => [
+            "base" => [
+                "title" => "Original Image",
+            ],
+            "gallery" => [
+                "title" => "More Images",
+            ],
+        ],
+        "fields" => [
+            "parent" => [
+                "title" => "Parent",
+            ],
+            "ordering" => [
+                "title" => "Ordering",
+                "placeholder" => "Enter ordering.",
+            ],
+        ],
+    ]
+
+];

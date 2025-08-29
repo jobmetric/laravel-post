@@ -22,14 +22,14 @@ class PostFactory extends Factory
     public function definition(): array
     {
         $status = fake()->randomElement(PostStatusEnum::values());
-
         $published_at = null;
+
         if ($status == PostStatusEnum::PUBLISH()) {
             $published_at = Carbon::now();
         } elseif ($status == PostStatusEnum::FUTURE()) {
             $published_at = fake()->dateTime("+1 week");
         }
-
+        
         return [
             'type' => null,
             'comment_status' => fake()->boolean(),
