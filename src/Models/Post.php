@@ -176,7 +176,10 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
                 $post->revisionState = null;
             }
         });
-        static::forceDeleted(function (self $post): void { $post->files()->detach(); });
+        static::forceDeleted(function (self $post): void {
+            $post->files()->detach();
+            $post->taxonomies()->detach();
+        });
     }
 
     public function snapshot(): array
