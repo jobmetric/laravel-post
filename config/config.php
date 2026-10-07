@@ -27,6 +27,9 @@ return [
 
     "tables" => [
         'post' => 'posts',
-        'post_relation' => 'post_relations'
+        'post_relation' => 'post_relations',
+        'revision' => 'post_revisions',
     ],
+
+    'types' => [],
 ];

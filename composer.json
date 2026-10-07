@@ -20,8 +20,14 @@
         }
     ],
     "require": {
-        "php": ">=8.0.1",
+        "php": ">=8.1",
         "laravel/framework": ">=9.19",
+        "jobmetric/laravel-flow": "^2.4",
+        "jobmetric/laravel-taxonomy": "^4.2.3",
+        "jobmetric/laravel-translation": "^4.0.2",
+        "jobmetric/laravel-metadata": "^4.0.3",
+        "jobmetric/media": "^2.2.1",
+        "jobmetric/laravel-url": "^3.0.1",
         "jobmetric/laravel-package-core": "^1.20"
     },
     "autoload": {

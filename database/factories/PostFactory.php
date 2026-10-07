@@ -31,7 +31,7 @@ class PostFactory extends Factory
         }
 
         return [
-            'type' => null,
+            'type' => 'post',
             'comment_status' => fake()->boolean(),
             'password' => fake()->optional(0.3)->word(),
             'status' => $status,

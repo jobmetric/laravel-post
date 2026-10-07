@@ -11,3 +11,28 @@ composer require jobmetric/laravel-post
 ```
 
 ## Documentation
+
+## Registering a post type
+
+Post types share one `Post` model and are configured through `PostTypeRegistry`. Register them in a service provider after the taxonomy types they use are registered:
+
+```php
+use JobMetric\Post\Facades\PostTypeRegistry;
+
+PostTypeRegistry::register('article')
+    ->label('articles.title')
+    ->translationFields(['title', 'excerpt', 'content'])
+    ->allowTaxonomy('category', 'categories', true)
+    ->mediaCollection('base', false, ['image'])
+    ->mediaCollection('gallery', true, ['image'])
+    ->metadataFields(['subtitle', 'featured'])
+    ->urlPrefix('articles')
+    ->comments()
+    ->workflow('article');
+```
+
+Taxonomy attachments are checked against both the registered taxonomy type and the collection configured for the post type. Translated fields, metadata keys, media collections, URL prefix, comments and workflow are all type capabilities. `Post::scopeOfType()` and `Post::scopePublished()` are available for queries.
+
+Any Eloquent model can attach posts through named collections with `JobMetric\Post\HasPost`. Declare its allowed collections by overriding `$postCollections`, then use `postsIn()`, `attachPost()` or `syncPosts()`; the default collection is `default` and accepts multiple posts.
+
+Updates create a JSON revision containing the post's own attributes, translations, metadata and relationship identifiers. Restore with `$post->restoreRevision($revisionId)`. Restoring a revision does not revert workflow state or delete shared taxonomy and media records.
