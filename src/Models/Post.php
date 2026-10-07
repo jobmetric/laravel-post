@@ -121,6 +121,7 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
     {
         $collections = (array) static::typeRegistry()->getOption((string) $this->type, 'media-collections', []);
         $collections['base'] ??= ['media_collection' => 'public', 'size' => []];
+        $collections['editor'] ??= ['media_collection' => 'public', 'size' => [], 'multiple' => true, 'mimeTypes' => ['image']];
         foreach ($collections as &$definition) {
             $definition['media_collection'] = $definition['mediaCollection'] ?? $definition['media_collection'] ?? 'public';
             $definition['size'] ??= [];
