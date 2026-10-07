@@ -197,6 +197,8 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
     {
         $revision = $this->revisions()->findOrFail($revisionId);
         $state = (array) $revision->snapshot;
+        $currentSnapshot = $this->snapshot();
+        $lastRevisionId = (int) ($this->revisions()->max('id') ?? 0);
         DB::transaction(function () use ($state): void {
             $attributes = (array) ($state['attributes'] ?? []);
             unset($attributes['status']);
@@ -216,5 +218,9 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
                 $this->taxonomies()->attach((int) $taxonomy['id'], ['collection' => $taxonomy['collection'] ?? 'taxonomies']);
             }
         });
+
+        if ($this->snapshot() !== $currentSnapshot && (int) ($this->revisions()->max('id') ?? 0) === $lastRevisionId) {
+            $this->revisions()->create(['snapshot' => $currentSnapshot]);
+        }
     }
 }
