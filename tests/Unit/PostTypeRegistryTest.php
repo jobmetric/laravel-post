@@ -41,6 +41,18 @@ class PostTypeRegistryTest extends TestCase
         (new PostTypeRegistry)->register('Invalid Type');
     }
 
+    public function test_list_filters_can_be_registered_fluently(): void
+    {
+        $type = (new PostTypeRegistry)->register('article')
+            ->allowTaxonomy('category', 'categories')
+            ->filterTaxonomy('categories')
+            ->addFilter('author', ['label' => 'Author', 'options' => ['1' => 'Alice']])
+            ->get();
+
+        self::assertTrue($type['taxonomy-types']['categories']['filter']);
+        self::assertSame('Author', $type['filters']['author']['label']);
+    }
+
     public function test_post_model_enforces_the_registered_type_field_allowlists(): void
     {
         $registry = new PostTypeRegistry;

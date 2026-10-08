@@ -24,6 +24,24 @@ class PostTypeBuilder
         $taxonomies[$collection] = ['type' => $type, 'multiple' => $multiple];
         return $this->option('taxonomy-types', $taxonomies);
     }
+    public function filterTaxonomy(string $collection, bool $enabled = true): static
+    {
+        $taxonomies = (array) $this->registry->getOption($this->type, 'taxonomy-types', []);
+        if (! isset($taxonomies[$collection])) {
+            throw new InvalidArgumentException("Taxonomy collection [{$collection}] is not registered for post type [{$this->type}].");
+        }
+        $taxonomies[$collection]['filter'] = $enabled;
+        return $this->option('taxonomy-types', $taxonomies);
+    }
+    public function addFilter(string $key, array $definition): static
+    {
+        if ($key === '' || ! preg_match('/^[a-z][a-z0-9_]*$/', $key)) {
+            throw new InvalidArgumentException('Filter keys must contain lowercase letters, digits, and underscores.');
+        }
+        $filters = (array) $this->registry->getOption($this->type, 'filters', []);
+        $filters[$key] = $definition;
+        return $this->option('filters', $filters);
+    }
     public function taxonomyTypes(array $types): static { return $this->option('taxonomy-types', $types); }
     public function mediaCollection(string $name, bool $multiple = false, array $mimeTypes = ['image']): static
     {
