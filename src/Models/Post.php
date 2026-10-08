@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
@@ -40,6 +41,28 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
     protected static function newFactory(): Factory { return \JobMetric\Post\Factories\PostFactory::new(); }
     public function getTable(): string { return config('post.tables.post', 'posts'); }
     public function getRevisionTable(): string { return config('post.tables.revision', 'post_revisions'); }
+
+    /**
+     * Relate attached media using the pivot's creation timestamp only.
+     *
+     * @return MorphToMany
+     */
+    public function files(): MorphToMany
+    {
+        return $this->morphToMany(\JobMetric\Media\Models\Media::class, 'mediaable', config('media.tables.media_relation'))
+            ->withPivot('collection')->withTimestamps('created_at', false);
+    }
+
+    /**
+     * Relate assigned taxonomy terms using the pivot's creation timestamp only.
+     *
+     * @return MorphToMany
+     */
+    public function taxonomies(): MorphToMany
+    {
+        return $this->morphToMany(\JobMetric\Taxonomy\Models\Taxonomy::class, 'taxonomizable', config('taxonomy.tables.taxonomy_relation'))
+            ->withPivot('collection')->withTimestamps('created_at', false);
+    }
 
     public function taxonomyAllowTypes(): array
     {
@@ -120,7 +143,6 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
     public function mediaAllowCollections(): array
     {
         $collections = (array) static::typeRegistry()->getOption((string) $this->type, 'media-collections', []);
-        $collections['base'] ??= ['media_collection' => 'public', 'size' => []];
         $collections['editor'] ??= ['media_collection' => 'public', 'size' => [], 'multiple' => true, 'mimeTypes' => ['image']];
         foreach ($collections as &$definition) {
             $definition['media_collection'] = $definition['mediaCollection'] ?? $definition['media_collection'] ?? 'public';
@@ -138,7 +160,9 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
 
     protected function flowSubjectCollection(): ?string
     {
-        return (string) $this->type;
+        $type = (string) $this->type;
+
+        return $type === '' ? null : (string) static::typeRegistry()->getOption($type, 'workflow', $type);
     }
 
     public function revisions(): HasMany { return $this->hasMany(PostRevision::class, 'post_id')->latest('id'); }

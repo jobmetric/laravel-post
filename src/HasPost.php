@@ -14,7 +14,7 @@ trait HasPost
     public function posts(): MorphToMany
     {
         return $this->morphToMany(Post::class, 'postable', config('post.tables.post_relation', 'post_relations'))
-            ->withPivot('collection')->withTimestamps(['created_at']);
+            ->withPivot('collection')->withTimestamps('created_at', false);
     }
 
     public function postsIn(string $collection = 'default'): MorphToMany
