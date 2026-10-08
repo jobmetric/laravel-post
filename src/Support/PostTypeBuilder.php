@@ -38,6 +38,9 @@ class PostTypeBuilder
         if ($key === '' || ! preg_match('/^[a-z][a-z0-9_]*$/', $key)) {
             throw new InvalidArgumentException('Filter keys must contain lowercase letters, digits, and underscores.');
         }
+        if (! is_string($definition['label'] ?? null) || ! is_array($definition['options'] ?? null) || ! is_callable($definition['apply'] ?? null)) {
+            throw new InvalidArgumentException('A post filter requires a label, options array, and apply callback.');
+        }
         $filters = (array) $this->registry->getOption($this->type, 'filters', []);
         $filters[$key] = $definition;
         return $this->option('filters', $filters);

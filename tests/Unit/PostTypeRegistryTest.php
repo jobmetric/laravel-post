@@ -46,7 +46,7 @@ class PostTypeRegistryTest extends TestCase
         $type = (new PostTypeRegistry)->register('article')
             ->allowTaxonomy('category', 'categories')
             ->filterTaxonomy('categories')
-            ->addFilter('author', ['label' => 'Author', 'options' => ['1' => 'Alice']])
+            ->addFilter('author', ['label' => 'Author', 'options' => ['1' => 'Alice'], 'apply' => static function (): void {}])
             ->get();
 
         self::assertTrue($type['taxonomy-types']['categories']['filter']);
