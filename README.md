@@ -38,3 +38,7 @@ Editor.js image blocks validate their media identifiers and keep those files att
 Any Eloquent model can attach posts through named collections with `JobMetric\Post\HasPost`. Declare its allowed collections by overriding `$postCollections`, then use `postsIn()`, `attachPost()` or `syncPosts()`; the default collection is `default` and accepts multiple posts.
 
 Updates create a JSON revision containing the post's own attributes, translations, metadata and relationship identifiers. Restore with `$post->restoreRevision($revisionId)`. Restoring a revision does not revert workflow state or delete shared taxonomy and media records.
+
+## Post workflows
+
+`JobMetric\\Post\\Services\\PostWorkflow` provides reusable status discovery and transition execution for any registered post type. `availableStatuses()` returns the states reachable from the current or start state, while `availableStatusOptions()` and `allStatusOptions()` return localized workflow labels. `transition()` executes the matching Flow transition and throws `PostStatusTransitionNotAllowedException` when the configured flow does not permit the change. Applications can adapt that domain exception to their own validation response and provide fallback labels for untranslated states.
