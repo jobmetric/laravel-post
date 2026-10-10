@@ -8,6 +8,8 @@ use InvalidArgumentException;
 /** Fluent capabilities for one post type. */
 class PostTypeBuilder
 {
+    private const SEO_TRANSLATION_FIELDS = ['meta_title', 'meta_description', 'meta_keywords'];
+
     public function __construct(private readonly string $type, private readonly PostTypeRegistry $registry) {}
 
     public function label(string $label): static { return $this->option('label', $label); }
@@ -15,8 +17,21 @@ class PostTypeBuilder
     public function translationFields(array $fields): static
     {
         $fields = array_values(array_unique(array_map('strval', $fields)));
+        if ($this->registry->getOption($this->type, 'has-seo', false)) {
+            $fields = array_values(array_unique([...$fields, ...self::SEO_TRANSLATION_FIELDS]));
+        }
         if ($fields === []) { throw new InvalidArgumentException('A post type must allow at least one translated field.'); }
         return $this->option('translation-fields', $fields);
+    }
+    public function hasSeo(bool $enabled = true): static
+    {
+        $this->option('has-seo', $enabled);
+        $fields = (array) $this->registry->getOption($this->type, 'translation-fields', ['title', 'excerpt', 'content']);
+        $fields = $enabled
+            ? [...$fields, ...self::SEO_TRANSLATION_FIELDS]
+            : array_values(array_diff($fields, self::SEO_TRANSLATION_FIELDS));
+
+        return $this->option('translation-fields', array_values(array_unique($fields)));
     }
     public function allowTaxonomy(string $type, string $collection = 'taxonomies', bool $multiple = true): static
     {
