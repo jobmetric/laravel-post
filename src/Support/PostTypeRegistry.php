@@ -17,14 +17,22 @@ class PostTypeRegistry
             throw new InvalidArgumentException('Post type keys must be lowercase identifiers.');
         }
 
+        $isNew = ! $this->has($type);
+        $previous = $this->types[$type] ?? null;
         $this->types[$type] ??= ['label' => $type, 'translation-fields' => ['title', 'excerpt', 'content'], 'taxonomy-types' => [], 'media-collections' => []];
         $builder = new PostTypeBuilder($type, $this);
 
-        foreach ($options as $key => $value) {
-            $builder->option((string) $key, $value);
-        }
+        try {
+            return $builder->apply($options);
+        } catch (\Throwable $exception) {
+            if ($isNew) {
+                unset($this->types[$type]);
+            } else {
+                $this->types[$type] = $previous;
+            }
 
-        return $builder;
+            throw $exception;
+        }
     }
 
     public function for(string $type): PostTypeBuilder

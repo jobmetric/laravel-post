@@ -2,6 +2,9 @@
 
 namespace JobMetric\Post\Tests\Unit;
 
+require_once __DIR__.'/../../src/Support/PostTypeRegistry.php';
+require_once __DIR__.'/../../src/Support/PostTypeBuilder.php';
+
 use JobMetric\Post\Support\PostTypeRegistry;
 use JobMetric\Post\Models\Post;
 use Illuminate\Container\Container;
@@ -33,6 +36,52 @@ class PostTypeRegistryTest extends TestCase
         self::assertTrue($type['media-collections']['gallery']['multiple']);
         self::assertSame('articles', $type['url-prefix']);
         self::assertSame('article', $type['workflow']);
+    }
+
+    public function test_administration_permissions_use_explicit_taxonomy_style_chains(): void
+    {
+        $builder = (new PostTypeRegistry)->register('article')
+            ->viewPermission('admin.articles.view')
+            ->managePermission('admin.articles.manage');
+
+        self::assertSame('admin.articles.view', $builder->getViewPermission());
+        self::assertSame('admin.articles.manage', $builder->getManagePermission());
+    }
+
+    public function test_invalid_administration_permission_is_rejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        (new PostTypeRegistry)->register('article')->viewPermission('Admin Articles');
+    }
+
+    public function test_registry_applies_and_validates_permission_options(): void
+    {
+        $registry = new PostTypeRegistry;
+        $builder = $registry->register('article', [
+            'view-permission' => 'admin.articles.view',
+            'manage-permission' => 'admin.articles.manage',
+        ]);
+
+        self::assertSame('admin.articles.view', $builder->getViewPermission());
+        self::assertSame('admin.articles.manage', $builder->getManagePermission());
+
+        try {
+            $registry->register('invalid', ['view-permission' => 'invalid permission']);
+            self::fail('Invalid permissions should prevent type registration.');
+        } catch (\InvalidArgumentException) {
+            self::assertFalse($registry->has('invalid'));
+        }
+    }
+
+    public function test_url_capability_matches_the_taxonomy_builder_contract(): void
+    {
+        $builder = (new PostTypeRegistry)->register('article')
+            ->url()
+            ->urlPrefix('articles/news');
+
+        self::assertTrue($builder->hasUrl());
+        self::assertSame('articles/news', $builder->getUrlPrefix());
     }
 
     public function test_invalid_post_type_key_is_rejected(): void

@@ -21,17 +21,22 @@ use JobMetric\Post\Facades\PostTypeRegistry;
 
 PostTypeRegistry::register('article')
     ->label('articles.title')
+    ->viewPermission('admin.articles.view')
+    ->managePermission('admin.articles.manage')
     ->translationFields(['title', 'excerpt', 'content'])
     ->allowTaxonomy('category', 'categories', true)
     ->mediaCollection('base', false, ['image'])
     ->mediaCollection('gallery', true, ['image'])
     ->metadataFields(['subtitle', 'featured'])
+    ->url()
     ->urlPrefix('articles')
     ->comments()
     ->workflow('article');
 ```
 
 Taxonomy attachments are checked against both the registered taxonomy type and the collection configured for the post type. Translated fields, metadata keys, media collections, URL prefix, comments and workflow are all type capabilities. `Post::scopeOfType()` and `Post::scopePublished()` are available for queries.
+
+Post administration permissions use the same explicit `viewPermission()` and `managePermission()` chains as taxonomy types. Their `getViewPermission()` and `getManagePermission()` accessors are used by application middleware and navigation; `url()`/`hasUrl()` and `urlPrefix()`/`getUrlPrefix()` follow the same capability style.
 
 Editor.js image blocks validate their media identifiers and keep those files attached in the internal `editor` media collection, so file usage and revision restore remain accurate.
 
