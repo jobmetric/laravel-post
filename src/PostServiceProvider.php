@@ -7,9 +7,14 @@ use JobMetric\PackageCore\PackageCore;
 use JobMetric\PackageCore\PackageCoreServiceProvider;
 use JobMetric\Post\Support\PostTypeRegistry as Registry;
 
+/**
+ * Register post configuration, persistence services and type definitions.
+ */
 class PostServiceProvider extends PackageCoreServiceProvider
 {
     /**
+     * Declare package configuration, migrations and translations.
+     *
      * @param PackageCore $package
      *
      * @return void
@@ -23,8 +28,14 @@ class PostServiceProvider extends PackageCoreServiceProvider
             ->hasTranslation();
     }
 
+    /**
+     * Register package services and load configured post types.
+     *
+     * @return void
+     */
     public function afterRegisterPackage(): void
     {
+        $this->app->singleton(Post::class);
         $this->app->singleton(Registry::class);
         $this->app->alias(Registry::class, 'PostTypeRegistry');
         foreach (config('post.types', []) as $type => $options) {

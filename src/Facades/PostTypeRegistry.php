@@ -16,6 +16,10 @@ use Illuminate\Support\Facades\Facade;
  * @method static array all()
  * @method static array get(string $type)
  * @method static mixed getOption(string $type, string $key, mixed $default = null)
+ * @method static void setOption(string $type, string $key, mixed $value)
+ * @method static void ensureExists(string $type)
+ * @method static Registry unregister(string $type)
+ * @method static Registry clear()
  *
  * @see Registry
  */

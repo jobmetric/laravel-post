@@ -22,11 +22,15 @@ class PostWorkflow
     public function availableStatuses(Post $post): array
     {
         $flow = $post->exists ? $post->boundFlow() : $post->pickFlow();
-        if (!$flow) return [];
+        if (!$flow) {
+            return [];
+        }
 
         $current = $this->state($flow, (string) $post->status)
             ?? $flow->states()->start()->first();
-        if (!$current) return [];
+        if (!$current) {
+            return [];
+        }
 
         $ids = $flow->transitions()->where('from', $current->id)->whereNotNull('to')->pluck('to');
 
@@ -45,7 +49,9 @@ class PostWorkflow
     public function availableStatusOptions(Post $post, string $locale): array
     {
         $flow = $post->exists ? $post->boundFlow() : $post->pickFlow();
-        if (!$flow) return [];
+        if (!$flow) {
+            return [];
+        }
 
         return $this->labelStates($flow->states()->whereIn('status', $this->availableStatuses($post))->get(), $locale);
     }
@@ -61,7 +67,9 @@ class PostWorkflow
     public function allStatusOptions(Post $post, string $locale): array
     {
         $flow = $post->exists ? $post->boundFlow() : $post->pickFlow();
-        if (!$flow) return [];
+        if (!$flow) {
+            return [];
+        }
 
         return $this->labelStates($flow->states()->whereNotNull('status')->get(), $locale);
     }
@@ -81,7 +89,9 @@ class PostWorkflow
     {
         $flow = $post->boundFlow();
         if (!$flow) {
-            if (Post::typeRegistry()->getOption((string) $post->type, 'workflow') !== null) $this->invalidTransition();
+            if (Post::typeRegistry()->getOption((string) $post->type, 'workflow') !== null) {
+                $this->invalidTransition();
+            }
             if ((string) $post->status !== $target) {
                 $post->status = $target;
                 $post->save();
@@ -91,19 +101,29 @@ class PostWorkflow
 
         if ($isNew) {
             $start = $flow->states()->start()->first();
-            if (!$start) $this->invalidTransition();
+            if (!$start) {
+                $this->invalidTransition();
+            }
             $startTransition = $flow->transitions()->whereNull('from')->where('to', $start->id)->first();
-            if (!$startTransition) $this->invalidTransition();
+            if (!$startTransition) {
+                $this->invalidTransition();
+            }
             FlowTransition::runner((int) $startTransition->id, $post, [], $actor);
         }
 
-        if ((string) $post->status === $target) return;
+        if ((string) $post->status === $target) {
+            return;
+        }
 
         $from = $this->state($flow, (string) $post->status);
         $to = $this->state($flow, $target);
-        if (!$from || !$to) $this->invalidTransition();
+        if (!$from || !$to) {
+            $this->invalidTransition();
+        }
         $transition = $flow->transitions()->where('from', $from->id)->where('to', $to->id)->first();
-        if (!$transition) $this->invalidTransition();
+        if (!$transition) {
+            $this->invalidTransition();
+        }
 
         FlowTransition::runner((int) $transition->id, $post, [], $actor);
     }
