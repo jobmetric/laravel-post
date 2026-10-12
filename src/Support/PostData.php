@@ -34,7 +34,9 @@ class PostData
             'status' => ['sometimes', 'string', 'max:80'],
             'published_at' => ['nullable', 'date'],
             'comment_status' => ['sometimes', 'boolean'],
-            'password' => ['nullable', 'string', 'max:255'],
+            'password' => $builder->isPasswordEnabled()
+                ? ['nullable', 'string', 'max:255']
+                : ['prohibited'],
             'translation' => ['sometimes', 'array'],
             'translation.*' => [in_array('*', $fields, true) ? 'array' : 'array:'.implode(',', $fields)],
             'metadata' => [in_array('*', $metadata, true) ? 'array' : 'array:'.implode(',', $metadata)],

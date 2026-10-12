@@ -51,6 +51,8 @@ class PostTypeBuilder
             'metadata-fields' => ['metadataFields', 'array'],
             'has-seo' => ['hasSeo', 'boolean'],
             'seo' => ['seo', 'boolean'],
+            'has-password' => ['hasPassword', 'boolean'],
+            'password' => ['password', 'boolean'],
             'taxonomy-types' => ['taxonomyTypes', 'array'],
             'url' => ['url', 'string'],
             'comments' => ['comments', 'boolean'],

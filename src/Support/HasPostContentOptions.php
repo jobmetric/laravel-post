@@ -229,6 +229,40 @@ trait HasPostContentOptions
     }
 
     /**
+     * Enable or disable password protection for posts of this type.
+     *
+     * @param bool $enabled
+     *
+     * @return static
+     */
+    public function hasPassword(bool $enabled = true): static
+    {
+        return $this->option('has-password', $enabled);
+    }
+
+    /**
+     * Configure password protection through the equivalent fluent alias.
+     *
+     * @param bool $enabled
+     *
+     * @return static
+     */
+    public function password(bool $enabled = true): static
+    {
+        return $this->hasPassword($enabled);
+    }
+
+    /**
+     * Determine whether this post type accepts a content password.
+     *
+     * @return bool
+     */
+    public function isPasswordEnabled(): bool
+    {
+        return (bool) $this->getTypeParam('has-password', false);
+    }
+
+    /**
      * Record the hierarchy capability for clients that support it.
      *
      * @return static

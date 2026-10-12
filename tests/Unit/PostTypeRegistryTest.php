@@ -67,6 +67,22 @@ class PostTypeRegistryTest extends TestCase
         self::assertArrayHasKey('seo_image', $builder->getMediaCollections());
     }
 
+    public function test_password_chains_share_one_capability_and_support_disabling(): void
+    {
+        $builder = (new PostTypeRegistry)->register('article');
+
+        self::assertFalse($builder->isPasswordEnabled());
+        self::assertSame($builder, $builder->hasPassword());
+        self::assertTrue($builder->isPasswordEnabled());
+        self::assertTrue($builder->get()['has-password']);
+        $builder->password(false);
+        self::assertFalse($builder->isPasswordEnabled());
+        $builder->password()->hasPassword(false);
+        self::assertFalse($builder->isPasswordEnabled());
+        self::assertTrue((new PostTypeRegistry)->register('protected', ['password' => true])->isPasswordEnabled());
+        self::assertTrue((new PostTypeRegistry)->register('protected', ['has-password' => true])->isPasswordEnabled());
+    }
+
     public function test_administration_permissions_use_explicit_taxonomy_style_chains(): void
     {
         $builder = (new PostTypeRegistry)->register('article')

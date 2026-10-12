@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1
+
+- Add equivalent `hasPassword()` and `password()` post type capabilities and reject passwords for types without that capability.
+
 ## 1.1.0
 
 - Split post type capabilities into documented, reusable builder traits.
