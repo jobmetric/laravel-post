@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0
+
+- Add registered immutable business outcome events with English and Persian discovery metadata.
+- Publish minimal allowlisted identifiers after the owning transaction commits; preserve all legacy event signatures and behavior.
+- Suppress outcomes for validation failures, rollback and unchanged business state. Listener failures cannot invalidate committed writes. Delivery is synchronous without an outbox.
+- Release the existing versioned publication streams, content revisions, approvals, schedules and workflow definitions used by Jobic, alongside their committed outcome contracts.
+
+
 ## 1.1.1
 
 - Add equivalent `hasPassword()` and `password()` post type capabilities and reject passwords for types without that capability.

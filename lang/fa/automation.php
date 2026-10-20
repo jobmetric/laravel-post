@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'post_stored' => ['group' => 'محتوا', 'title' => 'محتوا ایجاد شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: محتوا ایجاد شد.'],
+    'post_updated' => ['group' => 'محتوا', 'title' => 'محتوا ویرایش شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: محتوا ویرایش شد.'],
+    'post_deleted' => ['group' => 'محتوا', 'title' => 'محتوا حذف شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: محتوا حذف شد.'],
+    'post_restored' => ['group' => 'محتوا', 'title' => 'محتوا بازیابی شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: محتوا بازیابی شد.'],
+    'post_force_deleted' => ['group' => 'محتوا', 'title' => 'محتوا برای همیشه حذف شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: محتوا برای همیشه حذف شد.'],
+    'post_media_synced' => ['group' => 'عملیات PostMedia', 'title' => 'عملیات PostMedia همگام شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: عملیات PostMedia همگام شد.'],
+    'post_taxonomy_synced' => ['group' => 'عملیات PostTaxonomy', 'title' => 'عملیات PostTaxonomy همگام شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: عملیات PostTaxonomy همگام شد.'],
+    'post_revision_stored' => ['group' => 'نسخهٔ محتوا', 'title' => 'نسخهٔ محتوا ایجاد شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: نسخهٔ محتوا ایجاد شد.'],
+    'publication_submitted' => ['group' => 'انتشار', 'title' => 'انتشار ارسال شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: انتشار ارسال شد.'],
+    'publication_approved' => ['group' => 'انتشار', 'title' => 'انتشار تأیید شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: انتشار تأیید شد.'],
+    'publication_rejected' => ['group' => 'انتشار', 'title' => 'انتشار رد شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: انتشار رد شد.'],
+    'publication_published' => ['group' => 'انتشار', 'title' => 'انتشار منتشر شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: انتشار منتشر شد.'],
+    'publication_restored' => ['group' => 'انتشار', 'title' => 'انتشار بازیابی شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: انتشار بازیابی شد.'],
+    'schedule_paused' => ['group' => 'زمان‌بندی', 'title' => 'زمان‌بندی متوقف شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: زمان‌بندی متوقف شد.'],
+    'schedule_stored' => ['group' => 'زمان‌بندی', 'title' => 'زمان‌بندی ایجاد شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: زمان‌بندی ایجاد شد.'],
+    'schedule_resumed' => ['group' => 'زمان‌بندی', 'title' => 'زمان‌بندی از سر گرفته شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: زمان‌بندی از سر گرفته شد.'],
+    'schedule_executed' => ['group' => 'زمان‌بندی', 'title' => 'زمان‌بندی اجرا شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: زمان‌بندی اجرا شد.'],
+    'schedule_cancelled' => ['group' => 'زمان‌بندی', 'title' => 'زمان‌بندی لغو شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: زمان‌بندی لغو شد.'],
+    'publication_withdrawn' => ['group' => 'انتشار', 'title' => 'انتشار پس گرفته شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: انتشار پس گرفته شد.'],
+    'publication_transitioned' => ['group' => 'انتشار', 'title' => 'انتشار تغییر وضعیت داد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: انتشار تغییر وضعیت داد.'],
+    'publication_updated' => ['group' => 'انتشار', 'title' => 'انتشار ویرایش شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: انتشار ویرایش شد.'],
+    'workflow_stored' => ['group' => 'گردش کار محتوا', 'title' => 'گردش کار محتوا ایجاد شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: گردش کار محتوا ایجاد شد.'],
+    'workflow_activated' => ['group' => 'گردش کار محتوا', 'title' => 'گردش کار محتوا فعال شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: گردش کار محتوا فعال شد.'],
+];

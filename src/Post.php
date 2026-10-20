@@ -7,10 +7,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use JobMetric\PackageCore\Output\Response;
 use JobMetric\Post\Models\Post as PostModel;
+use JobMetric\Post\Models\PostLocaleLock;
+use JobMetric\Post\Models\PostPublicationStream;
+use JobMetric\Post\Models\PostWorkflowDefinition;
 use JobMetric\Post\Services\PostWorkflow;
 use JobMetric\Post\Support\PostData;
 use JobMetric\Post\Support\PostTypeRegistry;
 use Throwable;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Persist complete post aggregates without depending on an administration panel.
@@ -101,6 +105,9 @@ class Post
         return (new PostModel())->getConnection()->transaction(function () use ($type, $id): Response {
             $post = $this->query($type)->lockForUpdate()->findOrFail($id);
             $post->delete();
+            if ($post->trashed()) {
+                app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Post\Events\Post\PostDeleteCommittedEvent($post->getKey()), $post->getConnectionName());
+            }
 
             return Response::make(true, trans('post::base.deleted'), ['id' => $id]);
         });
@@ -119,13 +126,23 @@ class Post
     {
         $this->data->validate($post, ['media' => $collections]);
         $post->getConnection()->transaction(function () use ($post, $collections): void {
+            $outcomeBefore = \JobMetric\EventSystem\Support\OutcomeState::capture($post, ['files']);
             foreach ($collections as $collection => $ids) {
+                $outcomeExistingIds = $post->files()->wherePivot('collection', $collection)->pluck((new \JobMetric\Media\Models\Media)->getTable().'.id')->map(static fn ($id): int => (int) $id)->sort()->values()->all();
+                $outcomeRequestedIds = array_map('intval', $ids);
+                sort($outcomeRequestedIds);
+                if ($outcomeExistingIds === array_values(array_unique($outcomeRequestedIds))) {
+                    continue;
+                }
                 $post->files()->wherePivot('collection', $collection)->detach();
                 foreach ($ids as $id) {
                     $post->attachMedia((int) $id, $collection);
                 }
             }
             $post->unsetRelation('files');
+            if ($outcomeBefore !== \JobMetric\EventSystem\Support\OutcomeState::capture($post, ['files'])) {
+                app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Post\Events\PostMedia\PostMediaSyncCommittedEvent($post->getKey()), $post->getConnectionName());
+            }
         });
     }
 
@@ -142,13 +159,23 @@ class Post
     {
         $this->data->validate($post, ['taxonomies' => $collections]);
         $post->getConnection()->transaction(function () use ($post, $collections): void {
+            $outcomeBefore = \JobMetric\EventSystem\Support\OutcomeState::capture($post, ['taxonomies']);
             foreach ($collections as $collection => $ids) {
+                $outcomeExistingIds = $post->taxonomies()->wherePivot('collection', $collection)->pluck((new \JobMetric\Taxonomy\Models\Taxonomy)->getTable().'.id')->map(static fn ($id): int => (int) $id)->sort()->values()->all();
+                $outcomeRequestedIds = array_map('intval', $ids);
+                sort($outcomeRequestedIds);
+                if ($outcomeExistingIds === array_values(array_unique($outcomeRequestedIds))) {
+                    continue;
+                }
                 $post->taxonomies()->wherePivot('collection', $collection)->detach();
                 foreach ($ids as $id) {
                     $post->attachTaxonomy((int) $id, $collection);
                 }
             }
             $post->unsetRelation('taxonomies');
+            if ($outcomeBefore !== \JobMetric\EventSystem\Support\OutcomeState::capture($post, ['taxonomies'])) {
+                app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Post\Events\PostTaxonomy\PostTaxonomySyncCommittedEvent($post->getKey()), $post->getConnectionName());
+            }
         });
     }
 
@@ -166,6 +193,19 @@ class Post
     {
         return $post->getConnection()->transaction(function () use ($post, $data, $actor): Response {
             $data = $this->data->validate($post, $data);
+            if ($post->exists) {
+                $stream = PostPublicationStream::where('post_id', $post->id)
+                    ->where('locale', PostPublicationStream::SHARED)->first();
+                $definition = $stream?->definition_id ? PostWorkflowDefinition::find($stream->definition_id) : null;
+                if ($definition?->enabled && $post->status !== 'editable') {
+                    throw ValidationException::withMessages(['status' => [trans('post::lifecycle.not_editable')]]);
+                }
+                foreach (array_keys((array) ($data['translation'] ?? [])) as $locale) {
+                    if (PostLocaleLock::where('post_id', $post->id)->where('locale', $locale)->where('locked', true)->exists()) {
+                        throw ValidationException::withMessages(['translation.'.$locale => [trans('post::lifecycle.language_locked')]]);
+                    }
+                }
+            }
             $before = $post->exists ? $post->snapshot() : null;
             $lastRevision = $post->exists ? (int) $post->revisions()->max('id') : 0;
             $isNew = ! $post->exists;
@@ -197,6 +237,11 @@ class Post
             if ($before !== null && $post->snapshot() !== $before
                 && (int) $post->revisions()->max('id') === $lastRevision) {
                 $post->revisions()->create(['snapshot' => $before]);
+            }
+
+            if ($isNew || $before !== $post->snapshot()) {
+                $outcome = $isNew ? new \JobMetric\Post\Events\Post\PostStoreCommittedEvent($post->getKey()) : new \JobMetric\Post\Events\Post\PostUpdateCommittedEvent($post->getKey());
+                app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch($outcome, $post->getConnectionName());
             }
 
             return Response::make(true, trans('post::base.saved'), ['post' => $post]);

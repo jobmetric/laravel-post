@@ -1,0 +1,31 @@
+<?php
+
+return [
+    'content_required' => 'Enter a meaningful title and content before continuing.',
+    'excerpt_required' => 'The excerpt does not meet the required length.',
+    'permission_denied' => 'You cannot perform this workflow transition.',
+    'tasks' => [
+        'content' => 'Required content', 'content_description' => 'Check the title and revision content.',
+        'permission' => 'Transition permission', 'permission_description' => 'Require the selected permission.',
+        'permission_key' => 'Permission key', 'audit' => 'Record action',
+        'audit_description' => 'Record the actor and revision in the transition history.',
+        'audit_note' => 'Action note',
+        'min_title_characters' => 'Minimum title characters', 'min_body_characters' => 'Minimum body characters',
+        'excerpt' => 'Require excerpt', 'excerpt_description' => 'Require the revision excerpt to meet the configured minimum length.',
+        'min_excerpt_characters' => 'Minimum excerpt characters',
+        'approved_revision' => 'Require approved revision', 'approved_revision_description' => 'Only an approved revision may pass this transition.',
+        'locale_key' => 'Language code',
+        'lock_language' => 'Lock language', 'lock_language_description' => 'Prevent edits to every field of the selected language.',
+        'unlock_language' => 'Unlock language', 'unlock_language_description' => 'Allow edits to the selected language again while the post is editable.',
+        'hide_live' => 'Hide live release', 'hide_live_description' => 'Withdraw the currently public release on this transition.',
+    ],
+    'review_required' => 'This revision must pass the configured workflow review.',
+    'shared_approval_required' => 'Approve the changed shared content first.',
+    'mapping_required' => 'Choose a destination for every occupied workflow state.',
+    'future_required' => 'Choose a future time before confirming this schedule.',
+    'schedule_exists' => 'Cancel or explicitly resume the existing schedule first.',
+    'approval_required' => 'This revision must be approved before publication or scheduling.',
+    'invalid_graph' => 'The workflow contains invalid states, transitions or tasks.',
+    'not_editable' => 'This post can only be edited in an editable workflow stage.',
+    'language_locked' => 'This language is locked by the workflow.',
+];

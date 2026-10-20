@@ -10,10 +10,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use JobMetric\Flow\HasWorkflow;
+use JobMetric\Flow\Models\Flow;
 use JobMetric\Media\Contracts\MediaContract;
 use JobMetric\Media\HasFile;
 use JobMetric\Metadata\HasMeta;
 use JobMetric\Post\Contracts\PostContract;
+use JobMetric\Post\Factories\PostFactory;
 use JobMetric\Post\Support\PostTypeRegistry;
 use JobMetric\Taxonomy\Contracts\TaxonomyContract;
 use JobMetric\Taxonomy\Facades\TaxonomyTypeRegistry;
@@ -30,6 +32,7 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
     use HasFactory, SoftDeletes, HasWorkflow, HasTranslation, HasMeta, HasFile, HasTaxonomy, HasUrl {
         HasTranslation::translate as protected persistTranslation;
         HasMeta::storeMetadata as protected persistMetadata;
+        HasWorkflow::pickFlow as protected pickConfiguredFlow;
     }
 
     protected $fillable = [
@@ -69,7 +72,7 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
      */
     protected static function newFactory(): Factory
     {
-        return \JobMetric\Post\Factories\PostFactory::new();
+        return PostFactory::new();
     }
     /**
      * Resolve the model table from the package configuration.
@@ -282,8 +285,18 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
     {
         $type = (string) $this->type;
 
-        return $type === '' ? null : (string) static::typeRegistry()
-            ->getOption($type, 'workflow', $type);
+        return $type === '' ? null : static::typeRegistry()
+            ->getOption($type, 'workflow');
+    }
+
+    /**
+     * Bind legacy flows only when the post type explicitly requests one.
+     *
+     * @return Flow|null
+     */
+    public function pickFlow(): ?Flow
+    {
+        return $this->flowSubjectCollection() === null ? null : $this->pickConfiguredFlow();
     }
 
     /**
@@ -318,9 +331,45 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
      */
     public function scopePublished(Builder $query): Builder
     {
-        return $query->where('status', 'publish')
-            ->where(fn (Builder $q) => $q->whereNull('published_at')
-                ->orWhere('published_at', '<=', now()));
+        return $query->whereNotIn('status', ['disabled', 'archive'])
+            ->whereHas('publicationStreams', fn (Builder $stream): Builder => $stream
+                ->where('locale', PostPublicationStream::SHARED)
+                ->whereNotNull('live_revision_id')
+                ->where('published_at', '<=', now()));
+    }
+
+    /**
+     * Query live content in one language without trusting the legacy global status.
+     *
+     * @param Builder $query
+     * @param string $locale
+     *
+     * @return Builder
+     */
+    public function scopeLiveInLocale(Builder $query, string $locale): Builder
+    {
+        $posts = $this->getTable();
+        $streams = config('post.tables.stream', 'post_publication_streams');
+        $revisions = config('post.tables.content_revision', 'post_content_revisions');
+
+        return $query->where('status', '!=', 'disabled')
+            ->whereExists(static fn ($inner) => $inner->selectRaw('1')->from($streams)
+            ->join($revisions, $revisions.'.id', '=', $streams.'.live_revision_id')
+            ->whereColumn($streams.'.post_id', $posts.'.id')
+            ->where($streams.'.locale', PostPublicationStream::SHARED)
+            ->whereNotNull($streams.'.live_revision_id')
+            ->where($streams.'.published_at', '<=', now())
+            ->whereJsonContainsKey($revisions.'.payload->languages->'.$locale));
+    }
+
+    /**
+     * Relate all language and shared publication streams to their owner.
+     *
+     * @return HasMany
+     */
+    public function publicationStreams(): HasMany
+    {
+        return $this->hasMany(PostPublicationStream::class);
     }
 
     /**
@@ -353,7 +402,8 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
         });
 
         static::updating(function (self $post): void {
-            $post->revisionState = $post->recordRevisions ? $post->fresh()->snapshot() : null;
+            $post->revisionState = $post->recordRevisions ? $post->fresh()
+                ->snapshot() : null;
         });
         static::updated(function (self $post): void {
             if ($post->revisionState !== null) {
@@ -363,6 +413,7 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
             }
         });
         static::forceDeleted(function (self $post): void {
+            app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Post\Events\Post\PostForceDeleteCommittedEvent($post->getKey()), $post->getConnectionName());
             $post->files()
                 ->detach();
             $post->taxonomies()
@@ -378,24 +429,24 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
     public function snapshot(): array
     {
         return [
-            'attributes'  => $this->only(['type', 'comment_status', 'password', 'status', 'published_at', 'slug', 'slug_collection']),
+            'attributes' => $this->only(['type', 'comment_status', 'password', 'status', 'published_at', 'slug', 'slug_collection']),
             'translation' => $this->translations()
                 ->orderBy('locale')
                 ->orderBy('field')
                 ->get(['locale', 'field', 'value'])
                 ->map(fn ($row) => ['locale' => $row->locale, 'field' => $row->field, 'value' => $row->value])
                 ->all(),
-            'metadata'    => $this->metas()
+            'metadata' => $this->metas()
                 ->orderBy('key')
                 ->get()
                 ->mapWithKeys(fn ($meta) => [$meta->key => $meta->is_json ? json_decode($meta->value, true) : $meta->value])
                 ->all(),
-            'files'       => $this->files()
+            'files' => $this->files()
                 ->orderBy((new \JobMetric\Media\Models\Media())->getTable() . '.id')
                 ->get()
                 ->map(fn ($file) => ['id' => (int) $file->getKey(), 'collection' => $file->pivot->collection])
                 ->all(),
-            'taxonomies'  => $this->taxonomies()
+            'taxonomies' => $this->taxonomies()
                 ->orderBy((new \JobMetric\Taxonomy\Models\Taxonomy())->getTable() . '.id')
                 ->get()
                 ->map(fn ($taxonomy) => ['id' => (int) $taxonomy->getKey(), 'collection' => $taxonomy->pivot->collection])
@@ -432,50 +483,65 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
      */
     public function restoreRevision(int $revisionId): void
     {
-        $this->getConnection()->transaction(function () use ($revisionId): void {
-            $record = static::query()->lockForUpdate()->findOrFail($this->getKey());
-            $state = (array) $record->revisions()->findOrFail($revisionId)->snapshot;
-            $currentSnapshot = $record->snapshot();
-            $record->withoutRevisionRecording(function () use ($record, $state): void {
-                $attributes = (array) ($state['attributes'] ?? []);
-                unset($attributes['status'], $attributes['type']);
-                if (($attributes['slug'] ?? null) === null) {
-                    unset($attributes['slug'], $attributes['slug_collection']);
-                }
-                $record->fill($attributes);
-                $translation = [];
-                foreach ((array) ($state['translation'] ?? []) as $row) {
-                    $translation[$row['locale']][$row['field']] = $row['value'];
-                }
-                foreach ($record->translations()->get() as $existing) {
-                    if (! array_key_exists($existing->field, $translation[$existing->locale] ?? [])) {
-                        $existing->delete();
+        $this->getConnection()
+            ->transaction(function () use ($revisionId): void {
+                $record = static::query()
+                    ->lockForUpdate()
+                    ->findOrFail($this->getKey());
+                $state = (array) $record->revisions()
+                    ->findOrFail($revisionId)->snapshot;
+                $currentSnapshot = $record->snapshot();
+                $record->withoutRevisionRecording(function () use ($record, $state): void {
+                    $attributes = (array) ($state['attributes'] ?? []);
+                    unset($attributes['status'], $attributes['type']);
+                    if (($attributes['slug'] ?? null) === null) {
+                        unset($attributes['slug'], $attributes['slug_collection']);
                     }
+                    $record->fill($attributes);
+                    $translation = [];
+                    foreach ((array) ($state['translation'] ?? []) as $row) {
+                        $translation[$row['locale']][$row['field']] = $row['value'];
+                    }
+                    foreach (
+                        $record->translations()
+                            ->get() as $existing) {
+                        if (! array_key_exists($existing->field, $translation[$existing->locale] ?? [])) {
+                            $existing->delete();
+                        }
+                    }
+                    foreach ($translation as $locale => $fields) {
+                        $record->translations()
+                            ->onlyTrashed()
+                            ->where('locale', $locale)
+                            ->whereIn('field', array_keys($fields))
+                            ->restore();
+                    }
+                    $record->translation = $translation;
+                    $record->save();
+                    if (($state['attributes']['slug'] ?? null) === null && $record->slug !== null) {
+                        $record->forgetSlug();
+                    }
+                    $record->forgetMetadata();
+                    $record->storeMetadataBatch((array) ($state['metadata'] ?? []));
+                    $record->files()
+                        ->detach();
+                    foreach ((array) ($state['files'] ?? []) as $file) {
+                        $record->files()
+                            ->attach((int) $file['id'], ['collection' => $file['collection'] ?? 'base']);
+                    }
+                    $record->taxonomies()
+                        ->detach();
+                    foreach ((array) ($state['taxonomies'] ?? []) as $taxonomy) {
+                        $record->taxonomies()
+                            ->attach((int) $taxonomy['id'], ['collection' => $taxonomy['collection'] ?? 'taxonomies']);
+                    }
+                });
+                if ($record->snapshot() !== $currentSnapshot) {
+                    $record->revisions()
+                        ->create(['snapshot' => $currentSnapshot]);
+                    app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Post\Events\Post\PostRestoreCommittedEvent($record->getKey()), $record->getConnectionName());
                 }
-                foreach ($translation as $locale => $fields) {
-                    $record->translations()->onlyTrashed()->where('locale', $locale)
-                        ->whereIn('field', array_keys($fields))->restore();
-                }
-                $record->translation = $translation;
-                $record->save();
-                if (($state['attributes']['slug'] ?? null) === null && $record->slug !== null) {
-                    $record->forgetSlug();
-                }
-                $record->forgetMetadata();
-                $record->storeMetadataBatch((array) ($state['metadata'] ?? []));
-                $record->files()->detach();
-                foreach ((array) ($state['files'] ?? []) as $file) {
-                    $record->files()->attach((int) $file['id'], ['collection' => $file['collection'] ?? 'base']);
-                }
-                $record->taxonomies()->detach();
-                foreach ((array) ($state['taxonomies'] ?? []) as $taxonomy) {
-                    $record->taxonomies()->attach((int) $taxonomy['id'], ['collection' => $taxonomy['collection'] ?? 'taxonomies']);
-                }
+                $this->refresh();
             });
-            if ($record->snapshot() !== $currentSnapshot) {
-                $record->revisions()->create(['snapshot' => $currentSnapshot]);
-            }
-            $this->refresh();
-        });
     }
 }

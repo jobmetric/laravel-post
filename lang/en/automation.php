@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'post_stored' => ['group' => 'Post', 'title' => 'Post created', 'description' => 'Committed outcome: Post created.'],
+    'post_updated' => ['group' => 'Post', 'title' => 'Post updated', 'description' => 'Committed outcome: Post updated.'],
+    'post_deleted' => ['group' => 'Post', 'title' => 'Post deleted', 'description' => 'Committed outcome: Post deleted.'],
+    'post_restored' => ['group' => 'Post', 'title' => 'Post restored', 'description' => 'Committed outcome: Post restored.'],
+    'post_force_deleted' => ['group' => 'Post', 'title' => 'Post permanently deleted', 'description' => 'Committed outcome: Post permanently deleted.'],
+    'post_media_synced' => ['group' => 'Post Media', 'title' => 'Post Media synchronized', 'description' => 'Committed outcome: Post Media synchronized.'],
+    'post_taxonomy_synced' => ['group' => 'Post Taxonomy', 'title' => 'Post Taxonomy synchronized', 'description' => 'Committed outcome: Post Taxonomy synchronized.'],
+    'post_revision_stored' => ['group' => 'Post Revision', 'title' => 'Post Revision created', 'description' => 'Committed outcome: Post Revision created.'],
+    'publication_submitted' => ['group' => 'Publication', 'title' => 'Publication submitted', 'description' => 'Committed outcome: Publication submitted.'],
+    'publication_approved' => ['group' => 'Publication', 'title' => 'Publication approved', 'description' => 'Committed outcome: Publication approved.'],
+    'publication_rejected' => ['group' => 'Publication', 'title' => 'Publication rejected', 'description' => 'Committed outcome: Publication rejected.'],
+    'publication_published' => ['group' => 'Publication', 'title' => 'Publication published', 'description' => 'Committed outcome: Publication published.'],
+    'publication_restored' => ['group' => 'Publication', 'title' => 'Publication restored', 'description' => 'Committed outcome: Publication restored.'],
+    'schedule_paused' => ['group' => 'Schedule', 'title' => 'Schedule paused', 'description' => 'Committed outcome: Schedule paused.'],
+    'schedule_stored' => ['group' => 'Schedule', 'title' => 'Schedule created', 'description' => 'Committed outcome: Schedule created.'],
+    'schedule_resumed' => ['group' => 'Schedule', 'title' => 'Schedule resumed', 'description' => 'Committed outcome: Schedule resumed.'],
+    'schedule_executed' => ['group' => 'Schedule', 'title' => 'Schedule executed', 'description' => 'Committed outcome: Schedule executed.'],
+    'schedule_cancelled' => ['group' => 'Schedule', 'title' => 'Schedule cancelled', 'description' => 'Committed outcome: Schedule cancelled.'],
+    'publication_withdrawn' => ['group' => 'Publication', 'title' => 'Publication withdrawn', 'description' => 'Committed outcome: Publication withdrawn.'],
+    'publication_transitioned' => ['group' => 'Publication', 'title' => 'Publication transitioned', 'description' => 'Committed outcome: Publication transitioned.'],
+    'publication_updated' => ['group' => 'Publication', 'title' => 'Publication updated', 'description' => 'Committed outcome: Publication updated.'],
+    'workflow_stored' => ['group' => 'Workflow', 'title' => 'Workflow created', 'description' => 'Committed outcome: Workflow created.'],
+    'workflow_activated' => ['group' => 'Workflow', 'title' => 'Workflow activated', 'description' => 'Committed outcome: Workflow activated.'],
+];

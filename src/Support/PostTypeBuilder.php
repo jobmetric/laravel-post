@@ -14,6 +14,7 @@ class PostTypeBuilder
     use HasPostFilterOptions;
     use HasPostMediaOptions;
     use HasPostTaxonomyOptions;
+    use HasPostLifecycleOptions;
 
     private const SEO_TRANSLATION_FIELDS = ['meta_title', 'meta_description', 'meta_keywords'];
 
@@ -59,6 +60,7 @@ class PostTypeBuilder
             'workflow' => ['workflow', 'string'],
             'filters' => ['filters', 'array'],
             'optimistic-locking' => ['optimisticLocking', 'boolean'],
+            'field-ownership' => ['fieldOwnership', 'array'],
             'back-url' => ['backUrl', 'string'],
         ];
 
