@@ -91,6 +91,7 @@ class PostServiceProvider extends PackageCoreServiceProvider
             $registry->register(\JobMetric\Post\Events\Publication\PublicationUpdateCommittedEvent::class);
             $registry->register(\JobMetric\Post\Events\Workflow\WorkflowStoreCommittedEvent::class);
             $registry->register(\JobMetric\Post\Events\Workflow\WorkflowActivateCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\PostStatus\PostStatusUpdateCommittedEvent::class);
         }
     }
 }

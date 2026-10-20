@@ -24,4 +24,5 @@ return [
     'publication_updated' => ['group' => 'Publication', 'title' => 'Publication updated', 'description' => 'Committed outcome: Publication updated.'],
     'workflow_stored' => ['group' => 'Workflow', 'title' => 'Workflow created', 'description' => 'Committed outcome: Workflow created.'],
     'workflow_activated' => ['group' => 'Workflow', 'title' => 'Workflow activated', 'description' => 'Committed outcome: Workflow activated.'],
+    'post_status_updated' => ['group' => 'Post Status', 'title' => 'Post Status updated', 'description' => 'Committed outcome: Post Status updated.'],
 ];

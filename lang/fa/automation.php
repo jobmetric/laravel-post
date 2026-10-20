@@ -24,4 +24,5 @@ return [
     'publication_updated' => ['group' => 'انتشار', 'title' => 'انتشار ویرایش شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: انتشار ویرایش شد.'],
     'workflow_stored' => ['group' => 'گردش کار محتوا', 'title' => 'گردش کار محتوا ایجاد شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: گردش کار محتوا ایجاد شد.'],
     'workflow_activated' => ['group' => 'گردش کار محتوا', 'title' => 'گردش کار محتوا فعال شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: گردش کار محتوا فعال شد.'],
+    'post_status_updated' => ['group' => 'عملیات PostStatus', 'title' => 'عملیات PostStatus ویرایش شد', 'description' => 'نتیجهٔ قطعی پس از ثبت موفق: عملیات PostStatus ویرایش شد.'],
 ];

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1
+
+- Cover direct status transitions and orphaned schedule cancellation with minimal committed outcomes.
+
 ## 1.2.0
 
 - Add registered immutable business outcome events with English and Persian discovery metadata.

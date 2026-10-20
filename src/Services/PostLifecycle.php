@@ -260,10 +260,11 @@ class PostLifecycle
         $stream = PostPublicationStream::findOrFail($schedule->stream_id);
         $post = $stream->post;
         if (! $post) {
-            DB::transaction(static function () use ($scheduleId): void {
+            DB::transaction(static function () use ($scheduleId, $stream): void {
                 $orphan = PostScheduledAction::lockForUpdate()->findOrFail($scheduleId);
                 if ($orphan->state === 'pending') {
                     $orphan->update(['state' => 'cancelled']);
+                    app(PostLifecycle::class)->record($stream, 'schedule_cancelled', null, ['schedule_id' => $orphan->id], (int) $orphan->revision_id);
                 }
             });
             return false;

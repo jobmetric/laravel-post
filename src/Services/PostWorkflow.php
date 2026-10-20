@@ -95,6 +95,7 @@ class PostWorkflow
             if ((string) $post->status !== $target) {
                 $post->status = $target;
                 $post->save();
+                app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Post\Events\PostStatus\PostStatusUpdateCommittedEvent($post->getKey()), $post->getConnectionName());
             }
             return;
         }
@@ -126,6 +127,7 @@ class PostWorkflow
         }
 
         FlowTransition::runner((int) $transition->id, $post, [], $actor);
+        app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Post\Events\PostStatus\PostStatusUpdateCommittedEvent($post->getKey()), $post->getConnectionName());
     }
 
     /**
