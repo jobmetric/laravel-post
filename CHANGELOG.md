@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2
+
+- Preserve and validate optional administration view permission keys on workflow states.
+
 ## 1.2.1
 
 - Cover direct status transitions and orphaned schedule cancellation with minimal committed outcomes.

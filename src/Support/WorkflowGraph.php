@@ -34,6 +34,7 @@ class WorkflowGraph
             'states.*.content_status' => ['sometimes', 'string', 'in:editable,publish,future,archive,disabled'],
             'states.*.name' => 'required|string|max:160',
             'states.*.description' => 'sometimes|nullable|string|max:2000',
+            'states.*.view_permission' => ['sometimes', 'nullable', 'string', 'max:160', 'regex:/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*$/'],
             'states.*.is_start' => 'required|boolean',
             'states.*.is_terminal' => 'required|boolean',
             'states.*.allows_approval' => 'sometimes|boolean',
