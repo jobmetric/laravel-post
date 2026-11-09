@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.5
+
+- Validate and preserve manual workflow transition route offsets in graph anchors.
+
 ## 1.2.4
 
 - Configure workflow transition restrictions with system roles instead of permission keys.
