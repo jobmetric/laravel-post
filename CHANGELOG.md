@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0
+
+- Add explicit Kanban post-type capability and direct transition role settings.
+- Normalize unambiguous legacy role tasks without removing ambiguous restrictions.
+- Add read-only transition condition previews with an opt-in custom-driver contract.
+
 ## 1.2.5
 
 - Validate and preserve manual workflow transition route offsets in graph anchors.

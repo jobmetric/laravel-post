@@ -60,6 +60,7 @@ class PostTypeBuilder
             'workflow' => ['workflow', 'string'],
             'filters' => ['filters', 'array'],
             'optimistic-locking' => ['optimisticLocking', 'boolean'],
+            'kanban' => ['kanban', 'boolean'],
             'field-ownership' => ['fieldOwnership', 'array'],
             'back-url' => ['backUrl', 'string'],
         ];

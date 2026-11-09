@@ -46,6 +46,9 @@ class PostStreamWorkflow
             if (! $edge || $nodes[$edge['from']]['status'] !== $stream->status) {
                 throw new PostStatusTransitionNotAllowedException('The transition is not available from the current stage.');
             }
+            if (! app(WorkflowTransitionAccess::class)->allows($edge, $actor)) {
+                throw new \JobMetric\Flow\Exceptions\TaskRestrictionException(trans('post::lifecycle.role_denied'), 403);
+            }
             $flow = $stream->boundFlow();
             if (! $flow || (int) $flow->id !== (int) $definition->flow_id) {
                 throw new PostStatusTransitionNotAllowedException('The workflow binding has changed.');

@@ -22,6 +22,7 @@ class WorkflowGraph
      */
     public function validate(array $graph, bool $requireReachability = true): array
     {
+        $graph = app(\JobMetric\Post\Services\WorkflowTransitionAccess::class)->normalize($graph);
         $graph = Validator::make($graph, [
             'start_position' => 'sometimes|array:x,y',
             'start_position.x' => 'required_with:start_position|numeric|between:-100000,100000',
@@ -50,6 +51,8 @@ class WorkflowGraph
             'transitions.*.to' => 'required|string|max:80',
             'transitions.*.slug' => ['required', 'string', 'max:80', 'distinct', 'regex:/^[a-z][a-z0-9_-]*$/'],
             'transitions.*.label' => 'required|string|max:160',
+            'transitions.*.roles' => 'sometimes|array|max:100',
+            'transitions.*.roles.*' => ['integer', 'min:1', 'distinct', \Illuminate\Validation\Rule::exists((new \JobMetric\Rolix\Models\Role)->getTable(), 'id')->where('type', 'system')],
             'transitions.*.anchors' => 'sometimes|array:from_side,to_side,route_offset_x,route_offset_y',
             'transitions.*.anchors.from_side' => 'sometimes|in:top,right,bottom,left',
             'transitions.*.anchors.to_side' => 'sometimes|in:top,right,bottom,left',

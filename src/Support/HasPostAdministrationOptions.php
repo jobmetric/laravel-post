@@ -224,6 +224,26 @@ trait HasPostAdministrationOptions
         return (bool) $this->getTypeParam('change-status-in-list', false);
     }
 
+    /** Enable the administration Kanban board for this post type.
+     *
+     * @param bool $enabled
+     *
+     * @return static
+     */
+    public function kanban(bool $enabled = true): static
+    {
+        return $this->option('kanban', $enabled);
+    }
+
+    /** Read the explicit Kanban capability, disabled by default.
+     *
+     * @return bool
+     */
+    public function hasKanban(): bool
+    {
+        return (bool) $this->getTypeParam('kanban', false);
+    }
+
     /**
      * Reject permission identifiers that do not follow the dotted key convention.
      *
