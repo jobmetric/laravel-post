@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.3
+
+- Preserve and validate optional system role IDs for workflow state administration visibility.
+
 ## 1.2.2
 
 - Preserve and validate optional administration view permission keys on workflow states.
