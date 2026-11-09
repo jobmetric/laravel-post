@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.4
+
+- Configure workflow transition restrictions with system roles instead of permission keys.
+- Preserve existing permission-based workflow definitions until they are replaced with role assignments.
+
 ## 1.2.3
 
 - Preserve and validate optional system role IDs for workflow state administration visibility.
