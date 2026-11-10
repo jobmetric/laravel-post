@@ -42,6 +42,11 @@ class PostTypeBuilder
      */
     public function apply(array $options): static
     {
+        if (array_key_exists('multiple_kanban', $options)) {
+            $multiple = $options['multiple_kanban'];
+            unset($options['multiple_kanban']);
+            $options['multiple_kanban'] = $multiple;
+        }
         $chains = [
             'label' => ['label', 'string'],
             'description' => ['description', 'string'],
@@ -61,6 +66,7 @@ class PostTypeBuilder
             'filters' => ['filters', 'array'],
             'optimistic-locking' => ['optimisticLocking', 'boolean'],
             'kanban' => ['kanban', 'boolean'],
+            'multiple_kanban' => ['multipleKanban', 'boolean'],
             'field-ownership' => ['fieldOwnership', 'array'],
             'back-url' => ['backUrl', 'string'],
         ];

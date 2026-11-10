@@ -1,3 +1,8 @@
+# v1.4.0
+
+- Add opt-in multipleKanban / hasMultipleKanban capability with validated multiple_kanban array configuration.
+- Disabling Kanban disables multiple boards; disabling multiple boards preserves the simple board.
+
 # Changelog
 
 ## 1.3.1

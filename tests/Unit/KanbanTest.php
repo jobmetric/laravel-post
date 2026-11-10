@@ -16,6 +16,24 @@ class KanbanTest extends TestCase
         self::assertFalse($builder->apply(['kanban' => false])->hasKanban());
     }
 
+    public function test_multiple_boards_are_opt_in_and_chain_order_is_explicit(): void
+    {
+        $builder = (new PostTypeRegistry)->register('multi-test');
+        self::assertFalse($builder->hasMultipleKanban());
+        self::assertTrue($builder->multipleKanban()->hasKanban());
+        self::assertTrue($builder->hasMultipleKanban());
+        self::assertFalse($builder->multipleKanban(false)->hasMultipleKanban());
+        self::assertTrue($builder->hasKanban());
+        self::assertFalse($builder->multipleKanban()->kanban(false)->hasMultipleKanban());
+        self::assertFalse($builder->hasKanban());
+        self::assertTrue($builder->kanban()->multipleKanban()->hasMultipleKanban());
+        foreach ([['kanban'=>false,'multiple_kanban'=>true], ['multiple_kanban'=>true,'kanban'=>false]] as $options) {
+            self::assertTrue($builder->apply($options)->hasMultipleKanban());
+        }
+        $this->expectException(\InvalidArgumentException::class);
+        $builder->apply(['multiple_kanban'=>'true']);
+    }
+
     public function test_single_role_task_migrates_and_ambiguous_restrictions_survive(): void
     {
         $task = ['driver' => RequirePermission::class, 'config' => ['roles' => [7]], 'status' => true];

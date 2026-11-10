@@ -232,6 +232,7 @@ trait HasPostAdministrationOptions
      */
     public function kanban(bool $enabled = true): static
     {
+        if (! $enabled) $this->option('multiple_kanban', false);
         return $this->option('kanban', $enabled);
     }
 
@@ -242,6 +243,27 @@ trait HasPostAdministrationOptions
     public function hasKanban(): bool
     {
         return (bool) $this->getTypeParam('kanban', false);
+    }
+
+    /** Enable multiple administration boards and their underlying Kanban capability.
+     *
+     * @param bool $enabled
+     *
+     * @return static
+     */
+    public function multipleKanban(bool $enabled = true): static
+    {
+        if ($enabled) $this->kanban();
+        return $this->option('multiple_kanban', $enabled);
+    }
+
+    /** Determine whether this type supports managed custom boards.
+     *
+     * @return bool
+     */
+    public function hasMultipleKanban(): bool
+    {
+        return $this->hasKanban() && (bool) $this->getTypeParam('multiple_kanban', false);
     }
 
     /**
