@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.1
+
+- Validate graph and legacy task configuration before normalizing role restrictions.
+- Keep malformed legacy data safe to inspect without weakening graph validation.
+
 ## 1.3.0
 
 - Add explicit Kanban post-type capability and direct transition role settings.

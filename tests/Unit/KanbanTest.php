@@ -29,4 +29,13 @@ class KanbanTest extends TestCase
         $graph = ['transitions' => [['tasks' => [$task]]]];
         self::assertSame($graph, $access->normalize($graph));
     }
+    public function test_malformed_graphs_are_left_for_validation_without_unsafe_normalization(): void
+    {
+        $access = new WorkflowTransitionAccess;
+        foreach ([['transitions' => 'bad'], ['transitions' => ['bad']], ['transitions' => [['tasks' => 'bad']]],
+            ['transitions' => [['tasks' => [null, ['driver' => RequirePermission::class, 'config' => 'bad']]]]]] as $graph) {
+            self::assertSame($graph, $access->normalize($graph));
+        }
+    }
+
 }

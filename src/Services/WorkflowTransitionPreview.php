@@ -37,7 +37,7 @@ class WorkflowTransitionPreview
         $payload = ['revision_id' => $revision->id, 'content' => $revision->payload];
         $status = 'ready';
         foreach ($edge['tasks'] ?? [] as $task) {
-            if (($task['status'] ?? true) === false) continue;
+            if (! ($task['status'] ?? true)) continue;
             $class = $task['driver'];
             if (is_subclass_of($class, AbstractActionTask::class)) continue;
             if (! is_subclass_of($class, WorkflowConditionPreview::class) && ! in_array($class, [RequireApprovedRevision::class, RequirePermission::class, RequireContent::class, RequireExcerpt::class], true)) {

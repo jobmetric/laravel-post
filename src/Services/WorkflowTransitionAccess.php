@@ -47,13 +47,15 @@ class WorkflowTransitionAccess
      */
     public function normalize(array $graph): array
     {
-        foreach ($graph['transitions'] ?? [] as $i => $edge) {
-            $legacy = array_filter($edge['tasks'] ?? [], fn ($task) => ($task['driver'] ?? '') === RequirePermission::class
+        if (! is_array($graph['transitions'] ?? null)) return $graph;
+        foreach ($graph['transitions'] as $i => $edge) {
+            if (! is_array($edge) || ! is_array($edge['tasks'] ?? null)) continue;
+            $legacy = array_filter($edge['tasks'] ?? [], fn ($task) => is_array($task) && ($task['driver'] ?? '') === RequirePermission::class
                 && ($task['status'] ?? true));
             if (count($legacy) !== 1 || ! empty($edge['roles'])) continue;
             $key = array_key_first($legacy);
             $config = $legacy[$key]['config'] ?? [];
-            if (empty($config['roles']) || ! empty($config['permission'])) continue;
+            if (! is_array($config) || ! is_array($config['roles'] ?? null) || $config['roles'] === [] || ! empty($config['permission'])) continue;
             $graph['transitions'][$i]['roles'] = array_values($config['roles']);
             unset($graph['transitions'][$i]['tasks'][$key]);
             $graph['transitions'][$i]['tasks'] = array_values($graph['transitions'][$i]['tasks']);

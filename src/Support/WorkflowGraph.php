@@ -22,7 +22,6 @@ class WorkflowGraph
      */
     public function validate(array $graph, bool $requireReachability = true): array
     {
-        $graph = app(\JobMetric\Post\Services\WorkflowTransitionAccess::class)->normalize($graph);
         $graph = Validator::make($graph, [
             'start_position' => 'sometimes|array:x,y',
             'start_position.x' => 'required_with:start_position|numeric|between:-100000,100000',
@@ -121,7 +120,7 @@ class WorkflowGraph
             $this->invalid('states');
         }
 
-        return $graph;
+        return app(\JobMetric\Post\Services\WorkflowTransitionAccess::class)->normalize($graph);
     }
 
     /**
