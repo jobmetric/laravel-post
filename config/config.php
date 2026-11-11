@@ -29,6 +29,7 @@ return [
         'post' => 'posts',
         'post_relation' => 'post_relations',
         'revision' => 'post_revisions',
+        'locale_lock' => 'post_locale_locks',
     ],
 
     'types' => [],

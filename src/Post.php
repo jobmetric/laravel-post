@@ -7,10 +7,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use JobMetric\PackageCore\Output\Response;
 use JobMetric\Post\Models\Post as PostModel;
+use JobMetric\Post\Models\PostLocaleLock;
+use JobMetric\Post\Models\PostPublicationStream;
+use JobMetric\Post\Models\PostWorkflowDefinition;
 use JobMetric\Post\Services\PostWorkflow;
 use JobMetric\Post\Support\PostData;
 use JobMetric\Post\Support\PostTypeRegistry;
 use Throwable;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Persist complete post aggregates without depending on an administration panel.
@@ -166,6 +170,19 @@ class Post
     {
         return $post->getConnection()->transaction(function () use ($post, $data, $actor): Response {
             $data = $this->data->validate($post, $data);
+            if ($post->exists) {
+                $stream = PostPublicationStream::where('post_id', $post->id)
+                    ->where('locale', PostPublicationStream::SHARED)->first();
+                $definition = $stream?->definition_id ? PostWorkflowDefinition::find($stream->definition_id) : null;
+                if ($definition?->enabled && $post->status !== 'editable') {
+                    throw ValidationException::withMessages(['status' => [trans('post::lifecycle.not_editable')]]);
+                }
+                foreach (array_keys((array) ($data['translation'] ?? [])) as $locale) {
+                    if (PostLocaleLock::where('post_id', $post->id)->where('locale', $locale)->where('locked', true)->exists()) {
+                        throw ValidationException::withMessages(['translation.'.$locale => [trans('post::lifecycle.language_locked')]]);
+                    }
+                }
+            }
             $before = $post->exists ? $post->snapshot() : null;
             $lastRevision = $post->exists ? (int) $post->revisions()->max('id') : 0;
             $isNew = ! $post->exists;

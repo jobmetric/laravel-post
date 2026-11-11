@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Add optional, versioned workflows per post type with validated graphs, draft definitions, impact previews, and explicit status mapping on activation.
+- Add independent language publication streams, shared-field revisions, exact-version approvals, live snapshots, and auditable transitions.
+- Add scheduled publication policies that either preserve an approved revision or pause until a manager explicitly resumes it; provide a registry for transactional scheduled actions.
+- Keep legacy global status columns for compatibility while exposing locale-specific live queries and publication reads.
+
 ## 1.1.1
 
 - Add equivalent `hasPassword()` and `password()` post type capabilities and reject passwords for types without that capability.
