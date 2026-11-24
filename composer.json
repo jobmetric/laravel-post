@@ -23,6 +23,7 @@
         "php": ">=8.1",
         "laravel/framework": ">=9.19",
         "jobmetric/laravel-flow": "^2.4",
+        "jobmetric/laravel-form": "^1.6",
         "jobmetric/laravel-taxonomy": "^4.3",
         "jobmetric/laravel-translation": "^4.0.2",
         "jobmetric/laravel-metadata": "^4.0.3",

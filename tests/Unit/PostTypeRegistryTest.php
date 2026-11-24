@@ -3,15 +3,32 @@
 namespace JobMetric\Post\Tests\Unit;
 
 require_once __DIR__.'/../../src/Support/PostTypeRegistry.php';
+require_once __DIR__.'/../../src/Support/HasPostMediaOptions.php';
 require_once __DIR__.'/../../src/Support/PostTypeBuilder.php';
 
 use JobMetric\Post\Support\PostTypeRegistry;
+use JobMetric\Form\FormBuilder;
 use JobMetric\Post\Models\Post;
 use Illuminate\Container\Container;
 use PHPUnit\Framework\TestCase;
 
 class PostTypeRegistryTest extends TestCase
 {
+    public function test_media_item_form_is_opt_in_and_scoped_to_its_collection(): void
+    {
+        $registry = new PostTypeRegistry;
+        $builder = $registry->register('banner')->mediaCollection('gallery', true)->baseMedia();
+        $form = new FormBuilder;
+
+        self::assertNull($builder->getMediaItemForm('gallery'));
+        self::assertSame($builder, $builder->mediaItemForm('gallery', $form));
+        self::assertSame($form, $registry->for('banner')->getMediaItemForm('gallery'));
+        self::assertNull($builder->getMediaItemForm('base'));
+
+        $this->expectException(\InvalidArgumentException::class);
+        $builder->mediaItemForm('missing', $form);
+    }
+
     protected function tearDown(): void
     {
         Container::setInstance(null);
