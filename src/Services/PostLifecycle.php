@@ -260,10 +260,11 @@ class PostLifecycle
         $stream = PostPublicationStream::findOrFail($schedule->stream_id);
         $post = $stream->post;
         if (! $post) {
-            DB::transaction(static function () use ($scheduleId): void {
+            DB::transaction(static function () use ($scheduleId, $stream): void {
                 $orphan = PostScheduledAction::lockForUpdate()->findOrFail($scheduleId);
                 if ($orphan->state === 'pending') {
                     $orphan->update(['state' => 'cancelled']);
+                    app(PostLifecycle::class)->record($stream, 'schedule_cancelled', null, ['schedule_id' => $orphan->id], (int) $orphan->revision_id);
                 }
             });
             return false;
@@ -387,7 +388,7 @@ class PostLifecycle
         return $this->mutate($post, $locale, $version, function (PostPublicationStream $stream) use ($actor): void {
             $stream->live_revision_id = null;
             $stream->published_at = null;
-            PostScheduledAction::where('stream_id', $stream->id)->whereIn('state', ['pending', 'paused'])->update(['state' => 'cancelled']);
+            $this->cancelSchedules($stream, $actor);
             $stream->version++;
             $this->record($stream, 'withdrawn', $actor);
         });
@@ -432,6 +433,22 @@ class PostLifecycle
 
             return $stream->refresh();
         });
+    }
+
+    /**
+     * Cancel active programs and describe each changed schedule after commit.
+     *
+     * @param PostPublicationStream $stream
+     * @param Authenticatable|null $actor
+     *
+     * @return void
+     */
+    public function cancelSchedules(PostPublicationStream $stream, ?Authenticatable $actor = null): void
+    {
+        foreach (PostScheduledAction::where('stream_id', $stream->id)->whereIn('state', ['pending', 'paused'])->lockForUpdate()->get() as $schedule) {
+            $schedule->update(['state' => 'cancelled']);
+            $this->record($stream, 'schedule_cancelled', $actor, ['schedule_id' => $schedule->id], (int) $schedule->revision_id);
+        }
     }
 
     /**
@@ -483,5 +500,48 @@ class PostLifecycle
             'revision_id' => $revisionId ?? $stream->draft_revision_id, 'event' => $event,
             'actor_id' => $actor?->getAuthIdentifier(), 'context' => json_encode($context, JSON_THROW_ON_ERROR), 'created_at' => now(),
         ]);
+
+        $outcomeClass = match ($event) {
+            'draft_saved' => \JobMetric\Post\Events\PostRevision\PostRevisionStoreCommittedEvent::class,
+            'submitted' => \JobMetric\Post\Events\Publication\PublicationSubmitCommittedEvent::class,
+            'approved' => \JobMetric\Post\Events\Publication\PublicationApproveCommittedEvent::class,
+            'rejected' => \JobMetric\Post\Events\Publication\PublicationRejectCommittedEvent::class,
+            'published' => \JobMetric\Post\Events\Publication\PublicationPublishCommittedEvent::class,
+            'restored_published' => \JobMetric\Post\Events\Publication\PublicationRestoreCommittedEvent::class,
+            'schedule_paused' => \JobMetric\Post\Events\Schedule\SchedulePauseCommittedEvent::class,
+            'scheduled' => \JobMetric\Post\Events\Schedule\ScheduleStoreCommittedEvent::class,
+            'schedule_resumed' => \JobMetric\Post\Events\Schedule\ScheduleResumeCommittedEvent::class,
+            'scheduled_action_completed' => \JobMetric\Post\Events\Schedule\ScheduleExecuteCommittedEvent::class,
+            'schedule_cancelled' => \JobMetric\Post\Events\Schedule\ScheduleCancelCommittedEvent::class,
+            'withdrawn' => \JobMetric\Post\Events\Publication\PublicationWithdrawCommittedEvent::class,
+            'transition' => \JobMetric\Post\Events\Publication\PublicationTransitionCommittedEvent::class,
+            'workflow_migrated' => \JobMetric\Post\Events\Publication\PublicationUpdateCommittedEvent::class,
+            default => null,
+        };
+        $outcomeChanged = match ($event) {
+            'draft_saved' => $stream->isDirty('draft_revision_id'),
+            'submitted' => $stream->isDirty('submitted_revision_id'),
+            'approved' => $stream->isDirty('approved_revision_id'),
+            'rejected' => $stream->isDirty('submitted_revision_id'),
+            'published' => $stream->isDirty('live_revision_id'),
+            'restored_published' => true,
+            'schedule_paused' => true,
+            'scheduled' => true,
+            'schedule_resumed' => true,
+            'scheduled_action_completed' => true,
+            'schedule_cancelled' => true,
+            'withdrawn' => $stream->isDirty(['live_revision_id', 'published_at']),
+            'transition' => ($context['from'] ?? null) !== ($context['to'] ?? null),
+            'workflow_migrated' => true,
+            default => false,
+        };
+        $outcomeStreamId = isset($context['schedule_id'])
+            ? (PostScheduledAction::find((int) $context['schedule_id'])?->stream_id ?? $stream->id) : $stream->id;
+        if ($outcomeClass && $outcomeChanged) {
+            app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new $outcomeClass(
+                (int) $stream->post_id, (int) $outcomeStreamId, $revisionId ?? $stream->draft_revision_id,
+                $actor?->getAuthIdentifier(), isset($context['schedule_id']) ? (int) $context['schedule_id'] : null
+            ), $stream->getConnectionName());
+        }
     }
 }

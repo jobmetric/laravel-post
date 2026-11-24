@@ -413,6 +413,7 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
             }
         });
         static::forceDeleted(function (self $post): void {
+            app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Post\Events\Post\PostForceDeleteCommittedEvent($post->getKey()), $post->getConnectionName());
             $post->files()
                 ->detach();
             $post->taxonomies()
@@ -538,6 +539,7 @@ class Post extends Model implements MediaContract, PostContract, TaxonomyContrac
                 if ($record->snapshot() !== $currentSnapshot) {
                     $record->revisions()
                         ->create(['snapshot' => $currentSnapshot]);
+                    app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Post\Events\Post\PostRestoreCommittedEvent($record->getKey()), $record->getConnectionName());
                 }
                 $this->refresh();
             });

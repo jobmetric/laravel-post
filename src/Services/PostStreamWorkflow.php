@@ -46,6 +46,9 @@ class PostStreamWorkflow
             if (! $edge || $nodes[$edge['from']]['status'] !== $stream->status) {
                 throw new PostStatusTransitionNotAllowedException('The transition is not available from the current stage.');
             }
+            if (! app(WorkflowTransitionAccess::class)->allows($edge, $actor)) {
+                throw new \JobMetric\Flow\Exceptions\TaskRestrictionException(trans('post::lifecycle.role_denied'), 403);
+            }
             $flow = $stream->boundFlow();
             if (! $flow || (int) $flow->id !== (int) $definition->flow_id) {
                 throw new PostStatusTransitionNotAllowedException('The workflow binding has changed.');
@@ -63,9 +66,8 @@ class PostStreamWorkflow
                 if (! $dueAt || $dueAt->lessThanOrEqualTo(now())) {
                     throw ValidationException::withMessages(['due_at' => [trans('post::lifecycle.future_required')]]);
                 }
-                PostScheduledAction::where('stream_id', $stream->id)
-                    ->whereIn('state', ['pending', 'paused'])->update(['state' => 'cancelled']);
-                PostScheduledAction::create([
+                app(PostLifecycle::class)->cancelSchedules($stream, $actor);
+                $outcomeSchedule = PostScheduledAction::create([
                     'stream_id' => $stream->id,
                     'revision_id' => $revisionId,
                     'action' => 'publish',
@@ -75,9 +77,9 @@ class PostStreamWorkflow
                     'execution_key' => (string) Str::uuid(),
                     'created_by' => $actor?->getAuthIdentifier(),
                 ]);
+                app(PostLifecycle::class)->record($stream, 'scheduled', $actor, ['schedule_id' => $outcomeSchedule->id], $revisionId);
             } else {
-                PostScheduledAction::where('stream_id', $stream->id)
-                    ->whereIn('state', ['pending', 'paused'])->update(['state' => 'cancelled']);
+                app(PostLifecycle::class)->cancelSchedules($stream, $actor);
             }
             $post->status = $stream->content_status;
             $post->published_at = $stream->content_status === 'future' ? $dueAt : ($stream->content_status === 'publish' ? now() : $post->published_at);

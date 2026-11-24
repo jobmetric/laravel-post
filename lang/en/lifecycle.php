@@ -4,10 +4,11 @@ return [
     'content_required' => 'Enter a meaningful title and content before continuing.',
     'excerpt_required' => 'The excerpt does not meet the required length.',
     'permission_denied' => 'You cannot perform this workflow transition.',
+    'role_denied' => 'Your role does not allow this workflow transition.',
     'tasks' => [
         'content' => 'Required content', 'content_description' => 'Check the title and revision content.',
-        'permission' => 'Transition permission', 'permission_description' => 'Require the selected permission.',
-        'permission_key' => 'Permission key', 'audit' => 'Record action',
+        'roles' => 'Transition roles', 'roles_description' => 'Require one of the selected system roles.',
+        'roles_key' => 'Allowed roles', 'audit' => 'Record action',
         'audit_description' => 'Record the actor and revision in the transition history.',
         'audit_note' => 'Action note',
         'min_title_characters' => 'Minimum title characters', 'min_body_characters' => 'Minimum body characters',

@@ -34,6 +34,8 @@ class WorkflowGraph
             'states.*.content_status' => ['sometimes', 'string', 'in:editable,publish,future,archive,disabled'],
             'states.*.name' => 'required|string|max:160',
             'states.*.description' => 'sometimes|nullable|string|max:2000',
+            'states.*.view_roles' => 'sometimes|array|max:100',
+            'states.*.view_roles.*' => 'integer|min:1|distinct',
             'states.*.is_start' => 'required|boolean',
             'states.*.is_terminal' => 'required|boolean',
             'states.*.allows_approval' => 'sometimes|boolean',
@@ -48,9 +50,13 @@ class WorkflowGraph
             'transitions.*.to' => 'required|string|max:80',
             'transitions.*.slug' => ['required', 'string', 'max:80', 'distinct', 'regex:/^[a-z][a-z0-9_-]*$/'],
             'transitions.*.label' => 'required|string|max:160',
-            'transitions.*.anchors' => 'sometimes|array:from_side,to_side',
+            'transitions.*.roles' => 'sometimes|array|max:100',
+            'transitions.*.roles.*' => ['integer', 'min:1', 'distinct', \Illuminate\Validation\Rule::exists((new \JobMetric\Rolix\Models\Role)->getTable(), 'id')->where('type', 'system')],
+            'transitions.*.anchors' => 'sometimes|array:from_side,to_side,route_offset_x,route_offset_y',
             'transitions.*.anchors.from_side' => 'sometimes|in:top,right,bottom,left',
             'transitions.*.anchors.to_side' => 'sometimes|in:top,right,bottom,left',
+            'transitions.*.anchors.route_offset_x' => 'sometimes|numeric|between:-100000,100000',
+            'transitions.*.anchors.route_offset_y' => 'sometimes|numeric|between:-100000,100000',
             'transitions.*.translations' => 'sometimes|array',
             'transitions.*.translations.*.name' => 'required|string|max:160',
             'transitions.*.tasks' => 'present|array|max:50',
@@ -114,7 +120,7 @@ class WorkflowGraph
             $this->invalid('states');
         }
 
-        return $graph;
+        return app(\JobMetric\Post\Services\WorkflowTransitionAccess::class)->normalize($graph);
     }
 
     /**

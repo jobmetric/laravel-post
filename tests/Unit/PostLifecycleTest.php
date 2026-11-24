@@ -36,6 +36,9 @@ class PostLifecycleTest extends TestCase
         Container::setInstance($app);
         $app->instance('config', new Repository(['database' => ['default' => 'default'], 'post' => ['tables' => ['post' => 'posts']], 'workflow' => ['tables' => ['flow_use' => 'flow_uses']]]));
         $app->instance('events', new Dispatcher($app));
+        $app->instance(\Illuminate\Contracts\Events\Dispatcher::class, $app['events']);
+        $app->instance(\Psr\Log\LoggerInterface::class, new \Psr\Log\NullLogger);
+        $app->instance('db.transactions', new \Illuminate\Database\DatabaseTransactionsManager);
         $app->instance('translator', new Translator(new ArrayLoader, 'en'));
         $app->instance('validator', new Factory($app['translator'], $app));
         $this->database = new Manager($app);
@@ -44,6 +47,7 @@ class PostLifecycleTest extends TestCase
         $this->database->setAsGlobal();
         $this->database->bootEloquent();
         $app->instance('db', $this->database->getDatabaseManager());
+        $app->instance(\Illuminate\Database\DatabaseManager::class, $app['db']);
         $app->bind('db.schema', fn () => $this->database->schema());
         Facade::setFacadeApplication($app);
         $this->database->schema()->create('posts', function ($table): void {

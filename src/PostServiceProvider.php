@@ -59,4 +59,39 @@ class PostServiceProvider extends PackageCoreServiceProvider
             app(Registry::class)->register((string) $type, is_array($options) ? $options : []);
         }
     }
+    /**
+     * Register committed business outcome definitions alongside legacy events.
+     *
+     * @return void
+     */
+    public function afterBootPackage(): void
+    {
+        if ($this->app->bound('EventRegistry')) {
+            $registry = $this->app->make('EventRegistry');
+            $registry->register(\JobMetric\Post\Events\Post\PostStoreCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Post\PostUpdateCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Post\PostDeleteCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Post\PostRestoreCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Post\PostForceDeleteCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\PostMedia\PostMediaSyncCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\PostTaxonomy\PostTaxonomySyncCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\PostRevision\PostRevisionStoreCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Publication\PublicationSubmitCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Publication\PublicationApproveCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Publication\PublicationRejectCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Publication\PublicationPublishCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Publication\PublicationRestoreCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Schedule\SchedulePauseCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Schedule\ScheduleStoreCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Schedule\ScheduleResumeCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Schedule\ScheduleExecuteCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Schedule\ScheduleCancelCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Publication\PublicationWithdrawCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Publication\PublicationTransitionCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Publication\PublicationUpdateCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Workflow\WorkflowStoreCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\Workflow\WorkflowActivateCommittedEvent::class);
+            $registry->register(\JobMetric\Post\Events\PostStatus\PostStatusUpdateCommittedEvent::class);
+        }
+    }
 }

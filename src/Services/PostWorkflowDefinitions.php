@@ -65,6 +65,8 @@ class PostWorkflowDefinitions
             ]);
             DB::table(config('post.tables.workflow', 'post_workflows'))->where('id', $workflow->id)->update(['version' => $version, 'updated_at' => now()]);
 
+            app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Post\Events\Workflow\WorkflowStoreCommittedEvent($definition->getKey()), $definition->getConnectionName());
+
             return $definition;
         });
     }
@@ -157,6 +159,8 @@ class PostWorkflowDefinitions
             DB::table(config('post.tables.workflow', 'post_workflows'))->where('id', $workflow->id)->update([
                 'active_definition_id' => $definition->id, 'version' => $workflow->version + 1, 'updated_at' => now(),
             ]);
+
+            app(\JobMetric\EventSystem\Support\CommittedEventDispatcher::class)->dispatch(new \JobMetric\Post\Events\Workflow\WorkflowActivateCommittedEvent($definition->getKey()), $definition->getConnectionName());
 
             return $definition;
         });
