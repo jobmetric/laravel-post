@@ -1,4 +1,4 @@
-# Unreleased
+# v1.4.2
 
 - Add the fluent `allowedStatuses()` post-type option and `getAllowedStatuses()` accessor.
 
