@@ -49,6 +49,7 @@ class PostTypeBuilder
         }
         $chains = [
             'label' => ['label', 'string'],
+            'allowed-statuses' => ['allowedStatuses', 'array'],
             'description' => ['description', 'string'],
             'permission' => ['permission', 'string'],
             'view-permission' => ['viewPermission', 'string'],

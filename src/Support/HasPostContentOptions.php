@@ -273,6 +273,39 @@ trait HasPostContentOptions
     }
 
     /**
+     * Set the ordered status allowlist for this post type.
+     *
+     * @param list<string> $statuses Empty means no restriction.
+     *
+     * @return static
+     * @throws InvalidArgumentException
+     */
+    public function allowedStatuses(array $statuses): static
+    {
+        if (! array_is_list($statuses)) {
+            throw new InvalidArgumentException('Allowed statuses must be a list.');
+        }
+
+        foreach ($statuses as $status) {
+            if (! is_string($status) || ! preg_match('/^[a-z][a-z0-9_-]*$/D', $status)) {
+                throw new InvalidArgumentException('Allowed statuses must be valid status keys.');
+            }
+        }
+
+        return $this->option('allowed-statuses', array_values(array_unique($statuses)));
+    }
+
+    /**
+     * Get the configured status allowlist in presentation order.
+     *
+     * @return list<string>
+     */
+    public function getAllowedStatuses(): array
+    {
+        return $this->getTypeParam('allowed-statuses', []);
+    }
+
+    /**
      * Bind this post type to a named workflow collection.
      *
      * @param string $flow

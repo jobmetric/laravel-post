@@ -1,3 +1,7 @@
+# Unreleased
+
+- Add the fluent `allowedStatuses()` post-type option and `getAllowedStatuses()` accessor.
+
 # v1.4.0
 
 - Add opt-in multipleKanban / hasMultipleKanban capability with validated multiple_kanban array configuration.

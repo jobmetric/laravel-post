@@ -4,6 +4,7 @@ namespace JobMetric\Post\Tests\Unit;
 
 require_once __DIR__.'/../../src/Support/PostTypeRegistry.php';
 require_once __DIR__.'/../../src/Support/HasPostMediaOptions.php';
+require_once __DIR__.'/../../src/Support/HasPostContentOptions.php';
 require_once __DIR__.'/../../src/Support/PostTypeBuilder.php';
 
 use JobMetric\Post\Support\PostTypeRegistry;
@@ -14,6 +15,20 @@ use PHPUnit\Framework\TestCase;
 
 class PostTypeRegistryTest extends TestCase
 {
+    public function test_allowed_statuses_are_optional_and_support_both_configuration_styles(): void
+    {
+        $registry = new PostTypeRegistry;
+        $banner = $registry->register('banner');
+        self::assertSame([], $banner->getAllowedStatuses());
+        self::assertSame($banner, $banner->allowedStatuses(['draft', 'publish', 'disabled']));
+        self::assertSame(['draft', 'publish', 'disabled'], $registry->for('banner')->getAllowedStatuses());
+        self::assertSame(['publish'], $banner->apply(['allowed-statuses' => ['publish', 'publish']])->getAllowedStatuses());
+        self::assertSame([], $banner->allowedStatuses([])->getAllowedStatuses());
+
+        $this->expectException(\InvalidArgumentException::class);
+        $banner->allowedStatuses(['Invalid status']);
+    }
+
     public function test_media_item_form_is_opt_in_and_scoped_to_its_collection(): void
     {
         $registry = new PostTypeRegistry;
